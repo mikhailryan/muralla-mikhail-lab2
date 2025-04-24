@@ -15,7 +15,8 @@ class Blog extends Database {
     public function getAllBlogs() {
         $sql = "SELECT b.*, u.first_name, u.username
                 FROM blog b
-                LEFT JOIN users u ON b.author_id = u.id";
+                LEFT JOIN users u ON b.author_id = u.id
+                ORDER BY created_at DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
@@ -25,10 +26,28 @@ class Blog extends Database {
         $sql = "SELECT b.*, u.first_name, u.username
                 FROM blog b
                 LEFT JOIN users u ON b.author_id = u.id
-                WHERE b.author_id = :author_id"; // Correctly filter by userId
+                WHERE b.author_id = :author_id
+                ORDER BY created_at DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute(['author_id' => $userId]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function getBlogById($id) {
+        $sql = "SELECT * FROM blog WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
+    public function updateBlog($id, $title, $content) {
+        $sql = "UPDATE blog SET title = :title, content = :content, updated_at = NOW() WHERE id = :id";
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([
+            'title' => $title,
+            'content' => $content,
+            'id' => $id
+        ]);
     }
 
     public function createBlog($data) {
